@@ -1,0 +1,133 @@
+* Python Tips & Tricks
+
+** Argument parsing
+
+When parsing arguments into the python interpreter, we can access the argument information with the `sys` module.
+
+1. Calling python with no arguments
+#+BEGIN_SRC
+$> python 
+Python 3.9.1 (default, Jan  8 2021, 17:17:43)
+[Clang 12.0.0 (clang-1200.0.32.28)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import sys
+>>> sys.argv[0]
+''
+#+END_SRC
+
+2. Calling a python script interactively
+#+BEGIN_SRC
+$> python -i example.py
+2 is a prime number
+3 is a prime number
+4 equals 2 * 2
+...
+9 equals 3 * 3
+>>> import sys
+>>> sys.argv
+['example.py']
+#+END_SRC
+
+3. Calling a python script as a module
+#+BEGIN_SRC
+$> python -i -m example
+2 is a prime number
+3 is a prime number
+4 equals 2 * 2
+...
+9 equals 3 * 3
+>>> import sys
+>>> sys.argv
+['/Users/alfredang/Code/tis-but-a-scratch/pythonTutorial/ch2_interpreter/example.py']
+#+END_SRC
+
+
+** Default function arguments
+
+When a default value is specified for a function argument, it is only evaluated once. This might cause issues when the value required is mutable (lists/dictionary/class instances).
+
+#+BEGIN_SRC
+def gimmeAdd(x, acc=[]):
+  acc.append(x)
+  return acc
+
+print(gimmeAdd(1))
+print(gimmeAdd(2))
+print(gimmeAdd(3))
+#+END_SRC
+
+The above snippet yields:
+
+#+BEGIN_SRC
+[1]
+[1,2]
+[1,2,3]
+#+END_SRC
+
+However, if we want a fresh instance of an empty list each time `gimmeAdd` is called, we instantiate `acc` with `None` instead.
+
+#+BEGIN_SRC
+def gimmeAdd2(x, acc=None):
+  if acc is None:
+    acc = []
+  acc.append(x)
+  return acc
+
+print(gimmeAdd2(1))
+print(gimmeAdd2(2))
+print(gimmeAdd2(3))
+#+END_SRC
+
+Running this new version yields:
+#+BEGIN_SRC
+[1]
+[2]
+[3]
+#+END_SRC
+
+
+** Functions
+
+*** kwargs
+With function definitions, when a final formal parameter of the form `**kwargs` is present, the function receives a dictionary containing all keyword arguments except for those corresponding to a formal parameter. 
+
+#+BEGIN_SRC
+def goodBurger(kind, **keywords):
+    print("-- Do you have any", kind, "?")
+    print("-- We dont't have any", kind)
+    print("-" * 40)
+    print(keywords)
+
+
+>>> print(goodBurger( "Good Burger"
+>>>                 , establishment="Good Burger"
+>>>                 , motto="Welcome to Good Burger, Home of the Good Burger"
+>>>                 ) )
+
+-- Do you have any Good Burger ?
+-- We dont't have any Good Burger
+----------------------------------------
+{'establishment': 'Good Burger', 'motto': 'Welcome to Good Burger, Home of the Good Burger'}
+None
+#+END_SRC
+
+Note: The goodBurger function returns None, which is why there's a None printed at the end of the codeblock above.
+
+
+*** name collisions
+
+Consider the following function definition:
+#+BEGIN_SRC
+def foo(name, **kwds):
+  return 'name' in kwds
+#+END_SRC
+
+Because `name` is always bound to the first parameter, running the function will throw an error. However, with the argument seperators `/` (positional only) and `*` (keyword only), it is possible. 
+
+#+BEGIN_SRC
+def foo(name, /, **kwds): # anything before '/' is a positional argument only
+  return 'name' in kwds
+
+>>> foo(1, **{'name':2})
+True 
+#+END_SRC
