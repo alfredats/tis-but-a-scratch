@@ -5,7 +5,7 @@
 When parsing arguments into the python interpreter, we can access the argument information with the `sys` module.
 
 1. Calling python with no arguments
-#+BEGIN_SRC
+#+BEGIN_SRC python
 $> python 
 Python 3.9.1 (default, Jan  8 2021, 17:17:43)
 [Clang 12.0.0 (clang-1200.0.32.28)] on darwin
@@ -15,8 +15,10 @@ Type "help", "copyright", "credits" or "license" for more information.
 ''
 #+END_SRC
 
+#+RESULTS:
+
 2. Calling a python script interactively
-#+BEGIN_SRC
+#+BEGIN_SRC python
 $> python -i example.py
 2 is a prime number
 3 is a prime number
@@ -29,7 +31,7 @@ $> python -i example.py
 #+END_SRC
 
 3. Calling a python script as a module
-#+BEGIN_SRC
+#+BEGIN_SRC python
 $> python -i -m example
 2 is a prime number
 3 is a prime number
@@ -46,7 +48,7 @@ $> python -i -m example
 
 When a default value is specified for a function argument, it is only evaluated once. This might cause issues when the value required is mutable (lists/dictionary/class instances).
 
-#+BEGIN_SRC
+#+BEGIN_SRC python
 def gimmeAdd(x, acc=[]):
   acc.append(x)
   return acc
@@ -58,7 +60,7 @@ print(gimmeAdd(3))
 
 The above snippet yields:
 
-#+BEGIN_SRC
+#+BEGIN_SRC python
 [1]
 [1,2]
 [1,2,3]
@@ -66,7 +68,7 @@ The above snippet yields:
 
 However, if we want a fresh instance of an empty list each time `gimmeAdd` is called, we instantiate `acc` with `None` instead.
 
-#+BEGIN_SRC
+#+BEGIN_SRC python
 def gimmeAdd2(x, acc=None):
   if acc is None:
     acc = []
@@ -79,7 +81,7 @@ print(gimmeAdd2(3))
 #+END_SRC
 
 Running this new version yields:
-#+BEGIN_SRC
+#+BEGIN_SRC python
 [1]
 [2]
 [3]
@@ -88,10 +90,11 @@ Running this new version yields:
 
 ** Functions
 
-*** kwargs
+*** Kwargs
+
 With function definitions, when a final formal parameter of the form `**kwargs` is present, the function receives a dictionary containing all keyword arguments except for those corresponding to a formal parameter. 
 
-#+BEGIN_SRC
+#+BEGIN_SRC python
 def goodBurger(kind, **keywords):
     print("-- Do you have any", kind, "?")
     print("-- We dont't have any", kind)
@@ -114,20 +117,40 @@ None
 Note: The goodBurger function returns None, which is why there's a None printed at the end of the codeblock above.
 
 
-*** name collisions
+*** Namespace collisions within functions
 
 Consider the following function definition:
-#+BEGIN_SRC
+#+BEGIN_SRC python
 def foo(name, **kwds):
   return 'name' in kwds
 #+END_SRC
 
 Because `name` is always bound to the first parameter, running the function will throw an error. However, with the argument seperators `/` (positional only) and `*` (keyword only), it is possible. 
 
-#+BEGIN_SRC
+#+BEGIN_SRC python
 def foo(name, /, **kwds): # anything before '/' is a positional argument only
   return 'name' in kwds
 
 >>> foo(1, **{'name':2})
 True 
+#+END_SRC
+
+
+
+** Lists
+
+*** Using Lists as Queues(FIFO)
+
+Python Lists are great as stacks (FILO), but terrible as queues because doing inserts/pops from the beginning of a list requires all other elements to be shifted by one. To implement a queue, use `collections.deque` which was designed to have fast appends and pops from both ends.
+
+#+BEGIN_SRC python
+>>> from collections import deque
+>>> queue = deque(["Eric", "John", "Michael"])
+>>> queue.append("Terry")   # add Terry to queue
+>>> queue.popleft()         # first to arrive now leaves
+'Eric'
+>>> queue.popleft()         # second to arrive now leaves
+'John'
+>>> queue                   # remaining queue
+deque(['Michael', 'Terry'])
 #+END_SRC
